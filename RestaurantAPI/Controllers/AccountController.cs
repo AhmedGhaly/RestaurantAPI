@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -87,6 +88,7 @@ namespace RestaurantAPI.Controllers
                 expiration = Mytoken.ValidTo
             });				      
 		}
+        
 
 
 		private async Task<List<Claim>> GetClaims(ApplicationIdentityUser user)
@@ -109,6 +111,18 @@ namespace RestaurantAPI.Controllers
         {
             var existingUser = await userManager.FindByEmailAsync(email);
             return (existingUser != null);
+        }
+        private string GetUserIdFromClaims()
+        {
+            var Identifier = User.FindFirst(ClaimTypes.NameIdentifier);
+            var UserId = Identifier.Value;
+            return UserId;
+        }
+        [HttpGet]
+        [Authorize]
+        public ActionResult test()
+        {
+            return Ok(GetUserIdFromClaims());
         }
     }
 }

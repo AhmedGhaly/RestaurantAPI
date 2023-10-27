@@ -8,6 +8,7 @@ using RestaurantAPI.Repository;
 using RestaurantAPI.Repository.ProductRepository;
 using RestaurantAPI.Repository.ResturantRepository;
 using RestaurantAPI.Services;
+using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen();
+
 
 
 
