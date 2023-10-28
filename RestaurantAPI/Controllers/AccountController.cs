@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -59,9 +60,9 @@ namespace RestaurantAPI.Controllers
             {
                 application_user_id = user.Id,
             };
-            userRepository.add(myUser);
+            userRepository.Add(myUser);
             userRepository.SaveChanges();
-            return Created("Account created successfuly",user);
+            return Created("Account created successfuly", null);
 				
         }
 		[HttpPost("LogIn")]
@@ -110,5 +111,7 @@ namespace RestaurantAPI.Controllers
             var existingUser = await userManager.FindByEmailAsync(email);
             return (existingUser != null);
         }
+
+        
     }
 }
