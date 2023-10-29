@@ -17,7 +17,7 @@ namespace RestaurantAPI.Controllers
             this._recipeRepository = recipeRepository;
         }
       
-        [HttpGet("{restaurantId}")]
+        [HttpGet("getByRestaurant/{restaurantId}")]
         public IActionResult GetRecipesByRestaurant(int restaurantId)
         {
             var recipes = _recipeRepository.getByRestaurantId(restaurantId);
