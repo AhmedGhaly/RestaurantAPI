@@ -18,7 +18,8 @@ namespace RestaurantAPI.Repository
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            UserTable userTable = GetById(id);
+            context.UserTables.Remove(userTable);
         }
 
         public List<UserTable> GetAll(string include = "")
@@ -26,9 +27,14 @@ namespace RestaurantAPI.Repository
             throw new NotImplementedException();
         }
 
-        public List<UserTable> GetAllByRestaurantId(int restaurantId)
+        public List<UserTable> GetAllBy(int restaurantId)
         {
             return context.UserTables.Where(r => r.restaurnatId == restaurantId).ToList();
+        }
+
+        public List<UserTable> GetAllByRestaurantId(int restaurantId)
+        {
+            return context.UserTables.Where(r => r.restaurnatId == restaurantId).Include(t => t.Table).ToList();
         }
 
         public List<UserTable> GetAllByUserId(int userId)
@@ -36,14 +42,9 @@ namespace RestaurantAPI.Repository
             return context.UserTables.Where(r => r.user_id == userId).Include(r => r.Table).Include(r => r.resturant).ToList();
         }
 
-        public UserTable getById(int id)
-        {
-            return context.UserTables.Find(id);
-        }
-
         public UserTable GetById(int id)
         {
-            throw new NotImplementedException();
+            return context.UserTables.Find(id); 
         }
 
         public int SaveChanges()

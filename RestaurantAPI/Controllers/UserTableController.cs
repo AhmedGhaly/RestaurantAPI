@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using RestaurantAPI.Dto;
 using RestaurantAPI.Dto.UserTable;
 using RestaurantAPI.Models;
@@ -20,9 +21,14 @@ namespace RestaurantAPI.Controllers
         }
 
         [HttpGet("searchByrestaurant/{restaurantId}")]
-        public ActionResult searchByRestauarntId(int restaurantId)
+        public ActionResult searchByRestauarntId(int restaurantId, [FromQuery] int p = 1)
         {
-            List<UserTable> restaurantTalbleUser = tableUserRepository.GetAllByRestaurantId(restaurantId);
+            const int pageSize = 10;
+            int skip = (p - 1) * pageSize;
+            List<UserTable> restaurantTalbleUser = tableUserRepository
+                .GetAllByRestaurantId(restaurantId)
+                .Skip(skip)
+                .Take(pageSize).ToList();
 
             // map list of usertable to usertabledto
             List<UserTableDto> userTableDto = new(); 
@@ -35,6 +41,7 @@ namespace RestaurantAPI.Controllers
                     phone = item.phone,
                     reservationNumber = item.id,
                     tableNumber = item.table_id,
+                    duration = item.duration,
                 }) ; 
             }
 
@@ -42,10 +49,17 @@ namespace RestaurantAPI.Controllers
         }
 
         [HttpGet("searchByUserId")]
-        [Authorize]
-        public ActionResult searchByUserId()
+        //[Authorize]
+        public ActionResult searchByUserId([FromQuery]int p = 1 )
         {
-            List<UserTable> userReservation = tableUserRepository.GetAllByUserId(userRepository.getUserByApplicationUserId(GetUserIdFromClaims()).id);
+
+            const int pageSize = 10;
+            int skip = (p - 1) * pageSize;
+
+            List<UserTable> userReservation = tableUserRepository.GetAllByUserId(userRepository
+                .getUserByApplicationUserId(GetUserIdFromClaims()).id)
+                .Skip(skip)
+                .Take(pageSize).ToList();
 
             // map list of usertable to usertabledto
             List<UserReservationDto> userTableDto = new();
@@ -53,16 +67,44 @@ namespace RestaurantAPI.Controllers
             {
                 userTableDto.Add(new UserReservationDto()
                 {
-                    dateTime = item.dateTime,
-                    restaurantName = item.resturant.Name,
-                    tableType = item.Table.TableType,
+                    
                     reservationNumber = item.id,
                     tableNumber = item.table_id,
+                    dateTime = item.dateTime,
+                    tableType = item.Table.TableType.ToString(),
+                    restaurantName = item.resturant.Name,
+                    duration = item.duration
                 });
             }
 
+
             return Ok(userTableDto);
         }
+
+
+        [HttpDelete]
+        public ActionResult deleteUserTable(int id)
+        {
+            if (id < 0)
+            {
+                return BadRequest("Invalid UserTable id.");
+            }
+
+            var res = tableUserRepository.GetById(id);
+            if (res is  null)
+                return NotFound("UserTable Not Found!");
+
+            tableUserRepository.Delete(id);
+            int Raws = tableUserRepository.SaveChanges();
+            if (Raws > 0)
+            {
+                return NoContent();
+            }
+
+            return NotFound("UserTable updated failed.");
+        }
+
+
 
     }
 }

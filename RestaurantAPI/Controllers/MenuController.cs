@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RestaurantAPI.Dto;
 using RestaurantAPI.Models;
 using RestaurantAPI.Repository;
@@ -20,7 +21,31 @@ namespace RestaurantAPI.Controllers
             MenuRepository = menuRepository;
             this.resturanrRepo = resturanrRepo;
         }
+        [HttpGet()]
+        public ActionResult getMenu()
+        {
+            
+            var menus = MenuRepository.GetAll();
+            if(menus is null)
+            {
+                return BadRequest();
+            }
+                List<RecipeDto> recipeDtos = new List<RecipeDto>();
+                List<MenuDto> menuDto = new();
+                foreach (var item in menus)
+                {
+                MenuDto oneMenuDTO = new MenuDto
+                {
+                    id = item.id,
+                    title = item.title
+                };
 
+                menuDto.Add(oneMenuDTO);
+            }
+
+                return Ok(menuDto);
+          
+        }
 
         [HttpGet("{restaurantId}")]
         public ActionResult getMenuByRestaurantId(int restaurantId)
@@ -36,7 +61,7 @@ namespace RestaurantAPI.Controllers
                     recipeDtos.AddRange(
                         item.Recipes
                         .Select(r => new RecipeDto()
-                        { Description = r.Description, imageUrl = r.imageUrl, Name = r.name, Price=r.Price}).ToList());
+                        { Description = r.Description, imageUrl = r.imageUrl, Name = r.name, Price=r.Price, menuName= item.title}).ToList());
                     menuDto.Add(new MenuDto() { 
                         id = item.id, 
                         title = item.title,
@@ -45,6 +70,52 @@ namespace RestaurantAPI.Controllers
                 return Ok(new {menuDto,recipeDtos});
             }
             return BadRequest();
+        }
+
+        [HttpGet("getmostRatedRecipe/{restaurantId}")]
+        public ActionResult getMostRatedRecipe(int restaurantId) {
+
+            List<MostRated> recipeDtos = new();
+            var recipes = MenuRepository.getMostRatedRecipe(restaurantId);
+            foreach (var item in recipes)
+            {
+                recipeDtos.Add(new MostRated()
+                {
+                    id= item.id,
+                    Description = item.Description,
+                    imageUrl = item.imageUrl,
+                    Name = item.name,
+                    Price = item.Price
+                });
+            }
+
+            return Ok(recipeDtos);
+        }
+
+
+        [HttpPost]
+        [Authorize]
+        public ActionResult Create([FromBody] MenuDto menuDto)
+        {
+            string userId = GetUserIdFromClaims();
+            int ResutantId = resturanrRepo.getByUserId(userId).id;
+            if (menuDto is null)
+            {
+                return BadRequest("Invalid menu data.");
+            }
+
+            var menu = new Menu
+            {
+                title = menuDto.title,
+                restaurantId = ResutantId
+
+            };
+
+
+            MenuRepository.Add(menu);
+            MenuRepository.SaveChanges();
+
+            return CreatedAtAction("getMenu", new { id = menu.id }, menuDto);
         }
     }
 }

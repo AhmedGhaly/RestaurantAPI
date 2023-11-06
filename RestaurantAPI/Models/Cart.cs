@@ -11,8 +11,14 @@ namespace RestaurantAPI.Models
         [Column(TypeName = "money")]
         public decimal totalPrice { get; set; } = 0m;
         
-        public virtual CartUser? CartUser { get; set; }
+        [ForeignKey("user")]
+        public int userId { get; set; }
 
+        public virtual User? user { get; set; }
+
+        [ForeignKey("order")]
+        public int? OrderId { get; set; }
         public virtual Order? order { get; set; }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using RestaurantAPI.Dto;
 using RestaurantAPI.Models;
 
 namespace RestaurantAPI.Repository.ProductRepository
@@ -11,14 +12,28 @@ namespace RestaurantAPI.Repository.ProductRepository
             Context = context;
         }
 
+        public List<Recipe> GetByName(string name)
+        {
+            return Context.Recipes
+                .Where(recipe => recipe.name.Contains(name))
+                .Include(recipe => recipe.Menu) // Include the Menu navigation property
+                .ThenInclude(menu => menu.restaurant) // Then include the Restaurant navigation property within Menu
+                .ToList();
+        }
 
 
         public List<Recipe> GetAll(string include = "")
         {
-            var recipes = Context.Recipes.Include(include).ToList();
-            if (recipes != null)
-                return recipes;
-            return null;
+            var query = Context.Recipes.AsQueryable();
+            if (!String.IsNullOrEmpty(include))
+            {
+                var includes = include.Split(",");
+                foreach (var inc in includes)
+                {
+                    query = query.Include(inc.Trim());
+                }
+            }
+            return query.ToList();
         }
 
         //public Recipe getByCategoryId(int categoryId)
@@ -31,12 +46,13 @@ namespace RestaurantAPI.Repository.ProductRepository
 
         public Recipe GetById(int id)
         {
-            var recipe = Context.Recipes.FirstOrDefault(r=>r.id == id);
+            var recipe = Context.Recipes.Where(r=>r.id == id).Include(r => r.recipteImages).Include(r => r.Menu).ThenInclude(r => r.restaurant).FirstOrDefault();
             if (recipe != null)
                 return recipe;
             return null;
         }
 
+       
         //public Recipe getByRestaurantId(int restaurantId)
         //{
         //    var recipe = Context.Recipes.FirstOrDefault(r => r.restaurantId == restaurantId);
@@ -47,27 +63,35 @@ namespace RestaurantAPI.Repository.ProductRepository
 
         public int SaveChanges()
         {
-            throw new NotImplementedException();
+            return Context.SaveChanges();
         }
 
         public void Update(Recipe entity)
         {
-            throw new NotImplementedException();
+            Context.Recipes.Update(entity);
         }
 
         public void Add(Recipe entity)
         {
-            throw new NotImplementedException();
+            Context.Recipes.Add(entity);
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            Recipe rec = GetById(id);
+            Context.Recipes.Remove(rec);
         }
 
         public List<Recipe> getByMenuId(int menuId)
         {
             return Context.Recipes.Where(r => r.menuId == menuId).ToList();
         }
+
+        public List<string> getRecipeImages(int id)
+        {
+            return Context.RecipeImages.Where(r => r.RecipeId == id).Select(r => r.Image).ToList();
+        }
+
+
     }
 }

@@ -10,6 +10,15 @@ using Microsoft.EntityFrameworkCore;
 using RestaurantAPI.Models;
 using RestaurantAPI.Repository.OrderRepository;
 using RestaurantAPI.Repository.CartRepository;
+using RestaurantAPI.Repository.LocationRepository;
+using RestaurantAPI.Repository.AddressRepository;
+
+using RestaurantAPI.Repository.CuponRepository;
+using RestaurantAPI.Repository.ResturantFeedBackRepository;
+using RestaurantAPI.Repository.RestaurantCateigoryRespository;
+using RestaurantAPI.Repository.RestaurantImageRepository;
+using RestaurantAPI.Repository.RecipeImageRespository;
+using RestaurantAPI.Repository.RecipeFeedBackRepository;
 
 namespace RestaurantAPI.Services
 {
@@ -17,20 +26,28 @@ namespace RestaurantAPI.Services
     {
         public static WebApplicationBuilder registerAllService(this WebApplicationBuilder builder)
         {
+            builder.Services.AddScoped<IRecipeFeedBackRepository, RecipeFeedBackRepository>();
             builder.Services.AddScoped<IRecipeRepository, RecipetRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
             builder.Services.AddScoped<IResturanrRepo, ResturantRepo>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<ICartRepository, CartRepository>();
+            builder.Services.AddScoped<IAddressRepository, AddressRepository>();
             builder.Services.AddScoped<ImageService, ImageService>();
             builder.Services.AddScoped<IToken, TokenService>();
             builder.Services.AddScoped<ITableRepository, TableRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ITableUserRepository, TableUserRepository>();
-            builder.Services.AddScoped<ICartUserRrepository, CartUserRrepository>();
             builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
             builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+            builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+            builder.Services.AddScoped<ICuponRepository, CuponRepository>();
+            builder.Services.AddScoped<IRestaurantCateigoryRepository, RestaurantCateigoryRepository>();
+            builder.Services.AddScoped<IRestaurantImageRepository, RestaurantImageRepository>();
+            builder.Services.AddScoped<IResturantFeedBackRepository, ResturantFeedBackRepository>();
+            builder.Services.AddScoped<IRecipeImageRespository, RecipeImageRespository>();
 
+            
             return builder;
         }
 
